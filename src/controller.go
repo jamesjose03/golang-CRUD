@@ -96,3 +96,24 @@ func updateProfile(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(result)
 }
+
+//Delete Profile of User
+
+func deleteProfile(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)["id"] //get Parameter value as string
+
+	_id, err := primitive.ObjectIDFromHex(params) // convert params to mongodb Hex ID
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+	opts := options.Delete().SetCollation(&options.Collation{}) // to specify language-specific rules for string comparison, such as rules for lettercase
+	res, err := userCollection.DeleteOne(context.TODO(), bson.D{{"_id", _id}}, opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("deleted %v documents\n", res.DeletedCount)
+	json.NewEncoder(w).Encode(res.DeletedCount) // return number of documents deleted
+
+}
