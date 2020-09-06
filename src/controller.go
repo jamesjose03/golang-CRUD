@@ -42,3 +42,26 @@ func createProfile(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(insertResult.InsertedID) // return the mongodb ID of generated document
 
 }
+
+// Get Profile of a particular User by Name
+
+func getUserProfile(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var body user
+	e := json.NewDecoder(r.Body).Decode(&body)
+	if e != nil {
+
+		fmt.Print(e)
+	}
+	var result primitive.M //  an unordered representation of a BSON document which is a Map
+	err := userCollection.FindOne(context.TODO(), bson.D{{"name", body.Name}}).Decode(&result)
+	if err != nil {
+
+		fmt.Println(err)
+
+	}
+	json.NewEncoder(w).Encode(result) // returns a Map containing document
+
+}
