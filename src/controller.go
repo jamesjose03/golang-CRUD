@@ -65,3 +65,34 @@ func getUserProfile(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result) // returns a Map containing document
 
 }
+
+//Update Profile of User
+
+func updateProfile(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	type updateBody struct {
+		Name string `json:"name"` //value that has to be matched
+		City string `json:"city"` // value that has to be modified
+	}
+	var body updateBody
+	e := json.NewDecoder(r.Body).Decode(&body)
+	if e != nil {
+
+		fmt.Print(e)
+	}
+	filter := bson.D{{"name", body.Name}} // converting value to BSON type
+	after := options.After                // for returning updated document
+	returnOpt := options.FindOneAndUpdateOptions{
+
+		ReturnDocument: &after,
+	}
+	update := bson.D{{"$set", bson.D{{"city", body.City}}}}
+	updateResult := userCollection.FindOneAndUpdate(context.TODO(), filter, update, &returnOpt)
+
+	var result primitive.M
+	_ = updateResult.Decode(&result)
+
+	json.NewEncoder(w).Encode(result)
+}
